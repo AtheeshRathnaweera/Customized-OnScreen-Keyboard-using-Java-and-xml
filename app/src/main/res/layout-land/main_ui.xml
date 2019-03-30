@@ -10,27 +10,13 @@
     android:focusableInTouchMode="true">
 
     <LinearLayout
+        android:id="@+id/mainLinear"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:layout_centerInParent="true"
         android:orientation="vertical">
 
-    <EditText
-        android:id="@+id/numberTextFirst"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:gravity="center"
-        android:textColor="@color/colorPrimaryDark"
-        />
-
-    <EditText
-        android:id="@+id/numberTextSecond"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:gravity="center"
-        android:textColor="@color/colorPrimaryDark"
-        />
 
     </LinearLayout>
 

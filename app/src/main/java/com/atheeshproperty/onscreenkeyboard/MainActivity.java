@@ -1,5 +1,6 @@
 package com.atheeshproperty.onscreenkeyboard;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Build;
@@ -20,9 +21,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 public class MainActivity extends AppCompatActivity implements OnClickListener {
 
-    private EditText firstNumber, secondNumber;
+
     private ImageButton forwardButton, backwardButton, deleteButtonOne, deleteButtonTwo;
     private Button numberOne, numberTwo, numberThree, numberFour, numberFive,
             numberSix, numberSeven, numberEight, numberNine, numberZero;
@@ -31,6 +35,13 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     int previousOne = 0;
     int currentlySelectedEditText = 0;
 
+    LinearLayout mainLinear;
+    EditText editText;
+
+    int numberOfEditTexts = 5;
+
+    Integer[] idsArray = new Integer[numberOfEditTexts];
+
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -38,14 +49,24 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_ui);
 
-        //Initializing the Edit Text
-        firstNumber = findViewById(R.id.numberTextFirst);
-        firstNumber.setShowSoftInputOnFocus(false);
-        firstNumber.setCursorVisible(false);
+        mainLinear = findViewById(R.id.mainLinear);
 
-        secondNumber = findViewById(R.id.numberTextSecond);
-        secondNumber.setShowSoftInputOnFocus(false);
-        secondNumber.setCursorVisible(false);
+        generateAndAddEditTexts();
+
+
+        for (int n = 0; n < idsArray.length; n++) {
+            final EditText temp = getAEditTextForId(idsArray[n]);
+            temp.setOnTouchListener(new View.OnTouchListener() {
+                @RequiresApi(api = Build.VERSION_CODES.M)
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    Log.e("Touched", "Id : " + temp.getId());
+                    setTheNumberToEditText(temp.getId());
+                    return false;
+                }
+            });
+
+        }
 
 
         //Initializing the number buttons
@@ -83,28 +104,24 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
         deleteButtonsOnClickListners();
 
-        firstNumber.setOnTouchListener(new View.OnTouchListener() {
-            @RequiresApi(api = Build.VERSION_CODES.M)
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
 
-                setTheNumberToEditText(firstNumber.getId());
-                //Toast.makeText(MainActivity.this,"First edit text is selected",Toast.LENGTH_SHORT).show();
-                return false;
-            }
-        });
+    }
 
-        secondNumber.setOnTouchListener(new View.OnTouchListener() {
-            @RequiresApi(api = Build.VERSION_CODES.M)
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void generateAndAddEditTexts(){
+        for (int i = 0; i < numberOfEditTexts; i++) {
+            editText = new EditText(this);
+            editText.setLayoutParams(new LinearLayout.LayoutParams(500, ViewGroup.LayoutParams.WRAP_CONTENT));
+            editText.setShowSoftInputOnFocus(false);
+            editText.setCursorVisible(false);
+            editText.setMaxLines(1);
+            editText.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+            mainLinear.addView(editText);
 
-                setTheNumberToEditText(secondNumber.getId());
-                //Toast.makeText(MainActivity.this,"Second edit text is selected",Toast.LENGTH_SHORT).show();
-                return false;
-            }
-        });
+            editText.setId(View.generateViewId());
+            idsArray[i] = editText.getId();
 
+        }
 
     }
 
@@ -228,13 +245,33 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         temp.setText(theNumber);
     }
 
-    private void forwardBackProcess(){
+    private void forwardBackProcess() {
 
         forwardButton.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.M)
             @Override
             public void onClick(View v) {
-               EditText temp = getAEditTextForId(currentlySelectedEditText);
 
+                Log.e("clicked","Forward button clicked.");
+
+                int nextID = currentlySelectedEditText+1;
+
+                if (currentlySelectedEditText != 0 && Arrays.asList(idsArray).contains(nextID)) {
+                    Log.e("next id","There is a next id. next : "+nextID+" current : "+currentlySelectedEditText+" list : "+Arrays.asList(idsArray).toString());
+
+                    EditText tempPrev = getAEditTextForId(currentlySelectedEditText);
+                    EditText temp = getAEditTextForId(nextID);
+                    temp.requestFocus();
+                    temp.setTextColor(getColor(R.color.colorAccent));
+                    tempPrev.setTextColor(getColor(R.color.colorPrimary));
+
+                    previousOne = currentlySelectedEditText;
+                    currentlySelectedEditText = nextID;
+                    theNumber = "";
+                }else{
+                    Log.e("next id","No next id . current "+currentlySelectedEditText+" next:"+nextID);
+                    previousOne = currentlySelectedEditText;
+                }
             }
         });
     }
