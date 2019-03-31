@@ -3,8 +3,11 @@ package com.atheeshproperty.onscreenkeyboard;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
@@ -18,6 +21,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,6 +40,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     int currentlySelectedEditText = 0;
 
     LinearLayout mainLinear;
+    RelativeLayout thisRelative;
     EditText editText;
 
     int numberOfEditTexts = 5;
@@ -49,6 +54,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_ui);
 
+        thisRelative = findViewById(R.id.topLayout);
         mainLinear = findViewById(R.id.mainLinear);
 
         generateAndAddEditTexts();
@@ -101,6 +107,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
 
         forwardBackProcess();
+        backwardButtonProcess();
 
         deleteButtonsOnClickListners();
 
@@ -130,16 +137,26 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         deleteButtonOne.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                EditText temp = getAEditTextForId(currentlySelectedEditText);
-                backspace(temp.getText().toString(), currentlySelectedEditText);
+                if(currentlySelectedEditText != 0){
+                    EditText temp = getAEditTextForId(currentlySelectedEditText);
+                    backspace(temp.getText().toString(), currentlySelectedEditText);
+                }else{
+                    Snackbar.make(thisRelative, "Please select a text field first.", Snackbar.LENGTH_LONG).show();
+                }
+
             }
         });
 
         deleteButtonTwo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                EditText temp = getAEditTextForId(currentlySelectedEditText);
-                backspace(temp.getText().toString(), currentlySelectedEditText);
+                if(currentlySelectedEditText != 0){
+                    EditText temp = getAEditTextForId(currentlySelectedEditText);
+                    backspace(temp.getText().toString(), currentlySelectedEditText);
+                }else{
+                    Snackbar.make(thisRelative, "Please select a text field first.", Snackbar.LENGTH_LONG).show();
+                }
+
             }
         });
     }
@@ -184,14 +201,20 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     }
 
     public void concatenating(String number) {
-        if (theNumber.equals("")) {
+        if (theNumber.equals("") ) {
             theNumber = number;
         } else {
             theNumber = theNumber + number;
         }
 
-        EditText tempEdit = getAEditTextForId(currentlySelectedEditText);
-        tempEdit.setText(theNumber);
+        if(currentlySelectedEditText != 0){
+            EditText tempEdit = getAEditTextForId(currentlySelectedEditText);
+            tempEdit.setText(theNumber);
+        }else{
+            Snackbar.make(thisRelative, "Please select a text field first.", Snackbar.LENGTH_LONG).show();
+
+        }
+
 
         //Toast.makeText(MainActivity.this, "Number : " + theNumber, Toast.LENGTH_LONG).show();
 
@@ -208,6 +231,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             previousOne = selectedID;
             theNumber = tempEditText.getText().toString();
             tempEditText.setTextColor(getColor(R.color.colorAccent));
+            tempEditText.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.colorAccent)));
 
         } else {
             if (previousOne != selectedID) {
@@ -216,8 +240,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
                 EditText prevOne = getAEditTextForId(previousOne);
                 prevOne.setTextColor(getColor(R.color.colorPrimary));
+                prevOne.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.colorPrimary)));
 
                 tempEditText.setTextColor(getColor(R.color.colorAccent));
+                tempEditText.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.colorAccent)));
 
                 previousOne = selectedID;
             }
@@ -263,14 +289,63 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     EditText temp = getAEditTextForId(nextID);
                     temp.requestFocus();
                     temp.setTextColor(getColor(R.color.colorAccent));
+                    temp.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.colorAccent)));
+
                     tempPrev.setTextColor(getColor(R.color.colorPrimary));
+                    tempPrev.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.colorPrimary)));
 
                     previousOne = currentlySelectedEditText;
                     currentlySelectedEditText = nextID;
-                    theNumber = "";
+                    theNumber = temp.getText().toString();
                 }else{
-                    Log.e("next id","No next id . current "+currentlySelectedEditText+" next:"+nextID);
+
+                    if(currentlySelectedEditText == 0){
+                        Snackbar.make(thisRelative, "Please select a text field first.", Snackbar.LENGTH_LONG).show();
+                    }else{
+                        Log.e("next id","No next id . current "+currentlySelectedEditText+" next:"+nextID);
+                        previousOne = currentlySelectedEditText;
+                    }
+
+                }
+            }
+        });
+    }
+
+    public void backwardButtonProcess(){
+
+        backwardButton.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.M)
+            @Override
+            public void onClick(View v) {
+
+                Log.e("clicked","backward button clicked.");
+
+                int nextID = currentlySelectedEditText - 1;
+
+                if (currentlySelectedEditText != 0 && Arrays.asList(idsArray).contains(nextID)) {
+                    Log.e("next id","There is a next id. next : "+nextID+" current : "+currentlySelectedEditText+" list : "+Arrays.asList(idsArray).toString());
+
+                    EditText tempPrev = getAEditTextForId(currentlySelectedEditText);
+                    EditText temp = getAEditTextForId(nextID);
+                    temp.requestFocus();
+                    temp.setTextColor(getColor(R.color.colorAccent));
+                    temp.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.colorAccent)));
+
+                    tempPrev.setTextColor(getColor(R.color.colorPrimary));
+                    tempPrev.setBackgroundTintList(ColorStateList.valueOf(getColor(R.color.colorPrimary)));
+
                     previousOne = currentlySelectedEditText;
+                    currentlySelectedEditText = nextID;
+                    theNumber = temp.getText().toString();
+                }else{
+
+
+                    if(currentlySelectedEditText == 0){
+                        Snackbar.make(thisRelative, "Please select a text field first.", Snackbar.LENGTH_LONG).show();
+                    }else{
+                        Log.e("next id","No next id . current "+currentlySelectedEditText+" next:"+nextID);
+                        previousOne = currentlySelectedEditText;
+                    }
                 }
             }
         });
